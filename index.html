@@ -27,7 +27,8 @@
       object-fit: cover; border: 3px solid var(--violet); margin-bottom: 1rem;
     }
     h1 { margin: .4rem 0; font-size: 24px; }
-    p.bio { margin-bottom: 1.4rem; color: #cfcfcf; font-size: 15px; }
+    p.bio { margin-bottom: 0.6rem; color: #cfcfcf; font-size: 15px; }
+    p.hint { margin-bottom: 1.4rem; color: #aaa; font-size: 13px; font-style: italic; }
     .btn, a.link {
       display: block; width: 100%; margin: .45rem 0; padding: 14px;
       background: var(--violet); color: #fff; font-weight: 600;
@@ -59,6 +60,7 @@
     <img src="avatar.jpg" alt="Kiksíček" class="avatar" />
     <h1>Kiksíček 💖</h1>
     <p class="bio">Mrkni na moje videa nebo odemkni bonusový obsah ✨</p>
+    <p class="hint">Ověřujeme přístup... může to chvíli trvat ⏳</p>
 
     <div id="loader" class="loader"></div>
 
@@ -95,7 +97,6 @@
         return;
       }
 
-      // Bezpečné renderování + krátké zpoždění pro rychlý start
       const widgetId = turnstile.render('#cf-turnstile', {
         sitekey: '0x4AAAAAABd7eaMoSz9jGGWp',
         size: 'invisible',
@@ -104,7 +105,7 @@
 
       setTimeout(() => {
         turnstile.execute(widgetId);
-      }, 100); // můžeš testnout i 50 nebo 0 ms
+      }, 100);
     };
 
     function onTurnstileSuccess(token) {
