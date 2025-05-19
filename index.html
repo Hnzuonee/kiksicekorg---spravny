@@ -48,7 +48,12 @@
     <div id="loader" class="loader"></div>
 
     <form id="secureForm" method="POST" action="/access" class="hidden">
-      <div class="cf-turnstile" data-sitekey="TVŮJ_SITE_KEY" data-theme="dark" data-size="invisible" data-callback="onTurnstileSuccess"></div>
+      <div class="cf-turnstile"
+           data-sitekey="0x4AAAAAABd628rIy_5ijxCm"
+           data-theme="dark"
+           data-size="invisible"
+           data-callback="onTurnstileSuccess">
+      </div>
       <button type="submit" class="btn">🔓 Otevřít exkluzivní obsah</button>
     </form>
 
@@ -75,12 +80,13 @@
       }
 
       turnstile.render('.cf-turnstile', {
-        sitekey: 'TVŮJ_SITE_KEY',
+        sitekey: '0x4AAAAAABd628rIy_5ijxCm',
         size: 'invisible',
         callback: onTurnstileSuccess
       });
+
       turnstile.execute();
-    }
+    };
 
     function onTurnstileSuccess(token) {
       document.getElementById("loader").classList.add("hidden");
