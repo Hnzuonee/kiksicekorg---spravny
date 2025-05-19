@@ -1,116 +1,42 @@
-<!DOCTYPE html>
-<html lang="cs">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kiksíček • oficiální odkazy</title>
-
-  <!-- Font + Turnstile -->
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600&display=swap" rel="stylesheet" />
-  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-
-  <style>
-    :root { --violet: #be4dff; --violet-d: #9c3bdb; --bg: #16161d; --card: #242432; }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0; font-family: 'Space Grotesk', sans-serif;
-      background: var(--bg); color: #f5f5f5;
-      display: flex; flex-direction: column; align-items: center;
-      min-height: 100vh; text-align: center; padding: 2rem;
-    }
-    .card {
-      width: 100%; max-width: 420px; background: var(--card);
-      padding: 2rem; border-radius: 18px;
-      box-shadow: 0 8px 28px rgba(0, 0, 0, .35);
-    }
-    img.avatar {
-      width: 96px; height: 96px; border-radius: 50%;
-      object-fit: cover; border: 3px solid var(--violet); margin-bottom: 1rem;
-    }
-    h1 { margin: .4rem 0; font-size: 24px; }
-    p.bio { margin-bottom: 1.4rem; color: #cfcfcf; font-size: 15px; }
-    .btn, a.link {
-      display: block; width: 100%; margin: .45rem 0; padding: 14px;
-      background: var(--violet); color: #fff; font-weight: 600;
-      border: none; border-radius: 12px; font-size: 15px;
-      text-decoration: none; cursor: pointer;
-      transition: background .2s, transform .2s;
-    }
-    .btn:hover, a.link:hover {
-      background: var(--violet-d); transform: translateY(-2px);
-    }
-    .hidden { display: none; }
-    .loader {
-      width: 36px; height: 36px; border: 4px solid #444;
-      border-top: 4px solid var(--violet);
-      border-radius: 50%; animation: spin 0.8s linear infinite;
-      margin: 1rem auto;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0); }
-      100% { transform: rotate(360deg); }
-    }
-    footer { font-size: 12px; color: #888; margin-top: 2rem; }
-    footer a { color: #888; text-decoration: underline; }
-  </style>
-</head>
-<body>
-
-  <div class="card">
-    <img src="avatar.jpg" alt="Kiksíček" class="avatar" />
-    <h1>Kiksíček 💖</h1>
-    <p class="bio">Mrkni na moje videa nebo odemkni bonusový obsah ✨</p>
-
-    <div id="loader" class="loader"></div>
-
-    <form id="secureForm" method="POST" action="/access" class="hidden">
-      <div class="cf-turnstile"
-           data-sitekey="0x4AAAAAABd628rIy_5ijxCm"
-           data-theme="dark"
-           data-size="invisible"
-           data-callback="onTurnstileSuccess">
-      </div>
-      <input type="hidden" name="cf-turnstile-response" />
-      <button type="submit" class="btn">🔓 Otevřít exkluzivní obsah</button>
-    </form>
-
-    <a href="https://www.tiktok.com/@kristynka_cengerova/video/7495042844458077462" target="_blank" class="link">📱 TikTok video</a>
-    <a href="https://www.youtube.com/shorts/BXoj8Us5PI8" target="_blank" class="link">▶️ YouTube Shorts</a>
-    <a href="https://www.tiktok.com/@kristynka.cengerova/video/7501754508637195542" target="_blank" class="link">🎥 Z backstage natáčení</a>
-    <a href="https://www.tiktok.com/@kristynka.cengerova/video/7500874016329157910" target="_blank" class="link">📸 Nový reels ze včerejška</a>
-    <a href="https://www.tiktok.com/@kristynka.cengerova/video/7499744166444846358" target="_blank" class="link">🔥 Klip, co IG smazal 😅</a>
-  </div>
-
-  <footer>
-    © 2025 Kiksíček • Tento web používá cookies.<br>
-    <a href="#">Zásady ochrany soukromí</a> • <a href="#">Podmínky použití</a>
-  </footer>
-
-  <script>
-    const isBot = navigator.webdriver || false;
-
-    window.onload = () => {
-      if (isBot) {
-        document.getElementById("loader").style.borderTopColor = "tomato";
-        document.querySelector(".bio").textContent = "Ověření selhalo. Přístup zablokován.";
-        return;
-      }
-
-      turnstile.render('.cf-turnstile', {
-        sitekey: '0x4AAAAAABd628rIy_5ijxCm',
-        size: 'invisible',
-        callback: onTurnstileSuccess
-      });
-
-      turnstile.execute();
+exports.handler = async (event) => {
+  if (event.httpMethod !== "POST") {
+    return {
+      statusCode: 405,
+      body: "Method Not Allowed"
     };
+  }
 
-    function onTurnstileSuccess(token) {
-      document.querySelector("input[name='cf-turnstile-response']").value = token;
-      document.getElementById("loader").classList.add("hidden");
-      document.getElementById("secureForm").classList.remove("hidden");
-    }
-  </script>
+  const formData = new URLSearchParams(event.body);
+  const token = formData.get("cf-turnstile-response");
 
-</body>
-</html>
+  if (!token) {
+    return {
+      statusCode: 400,
+      body: "Chybí token z Turnstile."
+    };
+  }
+
+  const secret = process.env.CF_TURNSTILE_SECRET;
+
+  const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: `secret=${encodeURIComponent(secret)}&response=${encodeURIComponent(token)}`
+  });
+
+  const data = await response.json();
+
+  if (data.success) {
+    return {
+      statusCode: 302,
+      headers: {
+        Location: "https://onlyfans.com/kristynka.cengerova"
+      }
+    };
+  }
+
+  return {
+    statusCode: 403,
+    body: "Ověření selhalo. Přístup odepřen."
+  };
+};
