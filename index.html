@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kiksíček • oficiální odkazy</title>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600&display=swap" rel="stylesheet" />
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
   <style>
     :root{--violet:#be4dff;--violet-d:#9c3bdb;--bg:#16161d;--card:#242432;}
     *{box-sizing:border-box}
@@ -47,6 +48,7 @@
     <div id="loader" class="loader"></div>
 
     <form id="secureForm" method="POST" action="/access" class="hidden">
+      <div class="cf-turnstile" data-sitekey="TVŮJ_SITE_KEY" data-theme="dark" data-size="invisible" data-callback="onTurnstileSuccess"></div>
       <button type="submit" class="btn">🔓 Otevřít exkluzivní obsah</button>
     </form>
 
@@ -65,22 +67,25 @@
   <script>
     const isBot = navigator.webdriver || false;
 
-    const fpPromise = import('https://fpjscdn.net/v3/J2to0GchNP6i7QkcB0Pv')
-      .then(FingerprintJS => FingerprintJS.load({ region: "eu", linkedId: "kiksicek-landing" }))
-      .then(fp => fp.get())
-      .then(result => {
-        const confidence = result.confidence.score;
-        const visitorId = result.visitorId;
-        console.log("Kiksicek visitor:", visitorId, "| Confidence:", confidence);
+    window.onload = () => {
+      if (isBot) {
+        document.getElementById("loader").style.borderTopColor = "tomato";
+        document.querySelector(".bio").textContent = "Ověření selhalo. Přístup zablokován.";
+        return;
+      }
 
-        if (confidence > 0.6 && !isBot) {
-          document.getElementById("loader").classList.add("hidden");
-          document.getElementById("secureForm").classList.remove("hidden");
-        } else {
-          document.getElementById("loader").style.borderTopColor = "tomato";
-          document.querySelector(".bio").textContent = "Ověření se nezdařilo. Přístup zablokován.";
-        }
+      turnstile.render('.cf-turnstile', {
+        sitekey: 'TVŮJ_SITE_KEY',
+        size: 'invisible',
+        callback: onTurnstileSuccess
       });
+      turnstile.execute();
+    }
+
+    function onTurnstileSuccess(token) {
+      document.getElementById("loader").classList.add("hidden");
+      document.getElementById("secureForm").classList.remove("hidden");
+    }
   </script>
 
 </body>
