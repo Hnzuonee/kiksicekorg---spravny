@@ -63,7 +63,7 @@
     <div id="loader" class="loader"></div>
 
     <form id="secureForm" method="POST" action="/access" class="hidden">
-      <div class="cf-turnstile"
+      <div id="cf-turnstile" class="cf-turnstile"
            data-sitekey="0x4AAAAAABd7eaMoSz9jGGWp"
            data-theme="dark"
            data-size="invisible"
@@ -95,13 +95,16 @@
         return;
       }
 
-      turnstile.render('.cf-turnstile', {
+      // Bezpečné renderování + krátké zpoždění pro rychlý start
+      const widgetId = turnstile.render('#cf-turnstile', {
         sitekey: '0x4AAAAAABd7eaMoSz9jGGWp',
         size: 'invisible',
         callback: onTurnstileSuccess
       });
 
-      turnstile.execute();
+      setTimeout(() => {
+        turnstile.execute(widgetId);
+      }, 100); // můžeš testnout i 50 nebo 0 ms
     };
 
     function onTurnstileSuccess(token) {
