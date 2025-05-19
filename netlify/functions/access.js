@@ -1,5 +1,3 @@
-const fetch = require('node-fetch');
-
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") {
     return {
@@ -8,7 +6,6 @@ exports.handler = async (event) => {
     };
   }
 
-  // Načtení tokenu z formuláře
   const formData = new URLSearchParams(event.body);
   const token = formData.get("cf-turnstile-response");
 
@@ -21,7 +18,6 @@ exports.handler = async (event) => {
 
   const secret = process.env.CF_TURNSTILE_SECRET;
 
-  // Ověření tokenu u Cloudflare
   const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
